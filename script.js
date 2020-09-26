@@ -1,8 +1,9 @@
 // Assignment Code
 var generateBtn = document.querySelector("#generate");
+var passwordId = document.querySelector("#password");
 
 // character variables: used to set the characters to use in the password gen.
-var valueL = [
+const valueL = [
   'a',
   'b',
   'c',
@@ -30,7 +31,7 @@ var valueL = [
   'y',
   'z'
 ];
-var valueNum = [
+const valueNum = [
   '0',
   '1',
   '2',
@@ -42,7 +43,7 @@ var valueNum = [
   '8',
   '9',
 ];
-var valueU = [
+const valueU = [
   'A',
   'B',
   'C',
@@ -70,7 +71,7 @@ var valueU = [
   'Y',
   'Z'
 ];
-var valueS = [
+const valueS = [
   '@',
   '%',
   '+',
@@ -96,64 +97,111 @@ var valueS = [
   '.'
 ];
 
-// measures array lengths
-console.log(valueL.length + " lower length");
-console.log(valueU.length + " upper length");
-console.log(valueNum.length + " number length");
-console.log(valueS.length + " special length");
 
-// checks first value
-console.log(valueL[0]);
+const randomFunc = {
+  lC: RandomL,
+  uC: RandomU,
+  nC: RandomNum,
+  sC: RandomS
+};
 
-// randomly selects one string from it's assigned array
-console.log(Math.floor(Math.random() * valueL.length)+ " lower random");
-console.log(Math.floor(Math.random() * valueU.length)+ " upper random");
-console.log(Math.floor(Math.random() * valueNum.length)+ " number random");
-console.log(Math.floor(Math.random() * valueS.length)+ " special random");
-
-// sets character amount boundries
-// const is a read only variable assigned a value and cannot be reassigned hence 'Const'ant.
+// constrains the password length.
 const minNumber = 8;
 const maxNumber = 128;
 
-// starts prompt asking for a character limit, 
-// then starts a series of confirm boxes to determine which arrays will be included
-function confirmClick() {
-var complexity = prompt("How many characters do you want in your password?", "Please choose between 8 and 128")
-if (complexity < minNumber || complexity > maxNumber){
- alert("Password must be at least 8 characters and under 128 characters.")
+// runs the prompts and confirms to input the information needed to generate desired password string.
+generateBtn.addEventListener('click', function()  {
+
+  var complexity = prompt("How many characters do you want in your password?", "Please choose between 8 and 128");  
+  if (complexity < minNumber || complexity > maxNumber){
+   alert("Password must be at least 8 characters and under 128 characters.")
+   return;
+  }
+  if (isNaN(complexity) === true) {
+   alert("Password must be a number between 8 and 128.")
+  }
+  else{
+    // variables set.
+    var length = parseInt(complexity);
+    var lC = confirm("Do you want lowercase characters in your password?")
+    var uC = confirm("Do you want uppercase characters in your password?")
+    var nC = confirm("Do you want number characters in your password?")
+    var sC = confirm("Do you want special characters in your password?")
+
+    // logs if the above booleans are true or false and measures the length.
+    console.log(lC,uC,nC,sC);
+    console.log(length);
+
+    // readies the function to enter in the password into the html document.
+    passwordId.textContent = generatePassword(lC,uC,nC,sC,length);
+    }
+
+  // Generate password function.
+  function generatePassword (lC, uC, nC, sC, length){
+    let generatedPassword = "";
+
+    // simply counts the total values read.
+    const valueCount = lC + uC + nC + sC;
+    console.log('valueCount: ', valueCount);
+
+    // Sets a new arrow function referring to valuesArr as a 'this' and reads only true variables. 'item' Referring to any array it reads.
+    const valuesArr = [{ lC }, { uC }, { nC }, { sC }].filter(item => Object.values(item)[0]);
+
+    console.log('valuesArr: ', valuesArr);
+    
+    // Checks if all arrays are false, if so, returns stops the function.
+    if(valueCount === 0) {
+      return '';
+    }
+
+    // Reads each type of array based on the promted length variable
+    for(let i = 0; i < length; i += valueCount) {
+      valuesArr.forEach(type => {
+        const funcName = Object.keys(type)[0];
+
+        console.log('funcName: ', funcName);
+
+    // Appends the 'for' function to 'generatedPassword' string
+        generatedPassword += randomFunc[funcName]();
+      });
+    }
+    // Logs generate password, with .slice it will cut off the types by the length of complexity.
+    console.log(generatedPassword.slice(0, length));
+
+    // Sets a variable pooling the entire function to allow the string to be cut off at the length chosen
+    var passwordText = generatedPassword.slice(0, length);
+
+    // Sends the information up to the top of the function to run.
+    return passwordText;
+  }
+
+
+
+})
+
+
+
+// Value(L,U,Num,S) are my arrays.
+// Generator functions.
+function RandomL(){
+  return valueL[Math.floor(Math.random() * valueL.length)];
 }
-if (isNaN(complexity) === true) {
- alert("Password must be a number between 8 and 128")
+function RandomU(){
+  return valueU[Math.floor(Math.random() * valueU.length)];
 }
-else{
-var lC = confirm("Do you want lowercase characters in your password?")
-var uC = confirm("Do you want uppercase characters in your password?")
-var nC = confirm("Do you want number characters in your password?")
-var sC = confirm("Do you want special characters in your password?")
-var arraySelect;
-  if (lC == true && uC == false && nC == false && sC == false){
-    arraySelect = valueL
-  }
-  if (lC == true && uC == true && nC == false && sC == false){
-    arraySelect = valueL + valueU
-  }
-  if (lC == true && uC == true && nC == true && sC == false){
-    arraySelect = valueL + valueU + valueNum
-  }
-  if (lC == true && uC == true && nC == true && sC == false){
-    arraySelect = valueL
-  }
+function RandomNum(){
+  return valueNum[Math.floor(Math.random() * valueNum.length)];
 }
-  
+function RandomS(){
+  return valueS[Math.floor(Math.random() * valueS.length)];
 }
 
 
-  var passCode = "";
 
-  console.log(passCode);
 
-// Write password to the #password input
+
+
+// Write password to the #password input.
 function writePassword() {
   var password = generatePassword();
   var passwordText = document.querySelector("#password");
@@ -161,52 +209,3 @@ function writePassword() {
   passwordText.value = password;
 
 }
-
-
-
-
-
-
-// return statement 
-
-
-
-  // var lC = confirm("Do you want lowercase characters in your password?")
-  // if (lC == true) {
-  //   var uC = confirm("Do you want uppercase characters in your password?")
-  //   if (uC == true) {
-  //     var nC = confirm("Do you want number characters in your password?")
-  //     if (nC == true) {
-  //       var sC = confirm("Do you want special characters in your password?")
-  //       if (sC == true) {
-  //         //make password with all character types here
-        
-  //       }
-  //     } 
-  //   }
-  // }
-
-
-
-
-
-
-
-
-
-// sets variable combining all character variables
-// var allCharacters = valueL.concat(valueU,valueNum,valueS);
-
-
-
-
-
-
-// function getPasswordOptions() {
-//   var length = parseInt(prompt("How many characters do you want in your password?"))
-//    if(length < 8) {alert("sorry, password must be at least 8 characters.")}
-//    if(length > 128) {alert("Sorry, password must be under 128 characters.")}
-//    if(ifNaN(length) === true) {alert("Must Enter a number between 8 and 128.")}
-//   }
-// getPasswordOption()
-
